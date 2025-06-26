@@ -1,30 +1,18 @@
-const API_KEY = "your_api_key"; // Replace with your OMDb API key
+const API_KEY = "http://www.omdbapi.com/?i=tt3896198&apikey=862d132b"; // Replace with your OMDb API key
 
-function searchMovie() {
-  const query = document.getElementById("search-input").value;
+async function fetchmovie() {
+  const response = await fetch(API_KEY);
+  const data = await response.json();
+  console.log(data.Poster)
+  
+  const poster = document.getElementsByClassName("movie-card");
 
-  fetch(`https://www.omdbapi.com/?apikey=${API_KEY}&s=${query}`)
-    .then(response => response.json())
-    .then(data => {
-      const results = document.getElementById("movie-results");
-      results.innerHTML = "";
+for( let i = 0 ; i < poster.length ; i++){
+  poster[i].style.backgroundImage = `url(${data.Poster})`;
+   poster[i].style.backgroundSize = "cover";
+  poster[i].style.backgroundPosition = "center";
 
-      if (data.Response === "True") {
-        data.Search.forEach(movie => {
-          const movieElement = document.createElement("div");
-          movieElement.classList.add("movie");
-          movieElement.innerHTML = `
-            <h2>${movie.Title} (${movie.Year})</h2>
-            <img src="${movie.Poster !== "N/A" ? movie.Poster : "https://via.placeholder.com/150"}" alt="${movie.Title}" width="150"/>
-          `;
-          results.appendChild(movieElement);
-        });
-      } else {
-        results.innerHTML = `<p>No results found for "${query}"</p>`;
-      }
-    })
-    .catch(error => {
-      console.error("Error fetching movie data:", error);
-    });
 }
+}
+fetchmovie();
 
