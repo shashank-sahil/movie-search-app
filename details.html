@@ -1,45 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Movie Details</title>
   <style>
-    body { background-color: #111; color: white; font-family: Arial, sans-serif; padding: 20px; }
-    .poster { width: 300px; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0e0e0e;
+      color: #ffffff;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .movie-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .poster {
+      flex: 1 1 300px;
+      max-width: 300px;
+    }
+
+    .poster img {
+      width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+    }
+
+    .details {
+      flex: 2;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 2.5em;
+      color: #e50914;
+    }
+
+    .trailer-section {
+      margin-top: 40px;
+    }
+
+    iframe {
+      width: 100%;
+      max-width: 800px;
+      height: 450px;
+      border: none;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
+  <div class="container">
+    <div class="movie-header">
+      <div class="poster">
+        <img id="poster" src="" alt="Movie Poster"/>
+      </div>
+      <div class="details">
+        <h1 id="title">Movie Title</h1>
+        <p><strong>Year:</strong> <span id="year"></span></p>
+        <p><strong>Genre:</strong> <span id="genre"></span></p>
+        <p><strong>Director:</strong> <span id="director"></span></p>
+        <p><strong>Actors:</strong> <span id="actors"></span></p>
+        <p><strong>Plot:</strong> <span id="plot"></span></p>
+      </div>
+    </div>
 
-  <h1 id="title"></h1>
-  <img id="poster" class="poster" />
-  <p id="plot"></p>
-  <p><strong>Year:</strong> <span id="year"></span></p>
-  <p><strong>Genre:</strong> <span id="genre"></span></p>
-  <p><strong>Director:</strong> <span id="director"></span></p>
+    <div class="trailer-section">
+      <h2>Watch Trailer</h2>
+      <div id="trailer">
+        <!-- YouTube trailer will load here -->
+      </div>
+    </div>
+  </div>
 
   <script>
-    const API_KEY = "862d132b";
+    const OMDB_API_KEY = "862d132b";
+    const YOUTUBE_API_KEY = "AIzaSyCX4L5zBv49qLxhTnAtfnPTejncAWW19GU"; // Replace with your actual key
 
-    // Get the imdbID from URL
     const params = new URLSearchParams(window.location.search);
-    const movieID = params.get("id");
+    const movieId = params.get("id");
 
-    async function getMovieDetails(id) {
-      const response = await fetch(`https://www.omdbapi.com/?apikey=${API_KEY}&i=${id}`);
+    async function fetchMovieById(id) {
+      const response = await fetch(`https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&i=${id}`);
       const data = await response.json();
-
-      document.getElementById("title").textContent = data.Title;
-      document.getElementById("poster").src = data.Poster;
-      document.getElementById("plot").textContent = data.Plot;
-      document.getElementById("year").textContent = data.Year;
-      document.getElementById("genre").textContent = data.Genre;
-      document.getElementById("director").textContent = data.Director;
+      return data;
     }
 
-    if (movieID) {
-      getMovieDetails(movieID);
+    async function fetchYouTubeTrailer(movieTitle) {
+      const query = `${movieTitle} official trailer`;
+      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q=${encodeURIComponent(query)}&key=${YOUTUBE_API_KEY}`;
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.items && data.items.length > 0) {
+          return data.items[0].id.videoId;
+        }
+      } catch (error) {
+        console.error("Failed to fetch trailer:", error);
+      }
+      return null;
     }
+
+    async function displayMovieDetails() {
+      const movie = await fetchMovieById(movieId);
+
+      document.getElementById("title").textContent = movie.Title;
+      document.getElementById("year").textContent = movie.Year;
+      document.getElementById("genre").textContent = movie.Genre;
+      document.getElementById("director").textContent = movie.Director;
+      document.getElementById("actors").textContent = movie.Actors;
+      document.getElementById("plot").textContent = movie.Plot;
+      document.getElementById("poster").src = movie.Poster;
+
+      const trailerId = await fetchYouTubeTrailer(movie.Title);
+      if (trailerId) {
+        document.getElementById("trailer").innerHTML = `
+          <iframe src="https://www.youtube.com/embed/${trailerId}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        `;
+      } else {
+        document.getElementById("trailer").textContent = "Trailer not available.";
+      }
+    }
+
+    displayMovieDetails();
   </script>
-
 </body>
 </html>
