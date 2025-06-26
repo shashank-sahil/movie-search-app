@@ -1,5 +1,26 @@
 const API_KEY = "862d132b"; // Your OMDb API key
-initKeys = ["dhoom"];
+const initKeys = [
+  "Dune",
+  "Godzilla x Kong",
+  "Oppenheimer",
+  "Barbie",
+  "John Wick 4",
+  "Avatar 2",
+  "The Batman",
+  "Top Gun Maverick",
+  "Spider-Man No Way Home",
+  "RRR",
+  "Jawan",
+  "Pathaan",
+  "KGF",
+  "Pushpa",
+  "Brahmastra",
+  "The Flash",
+  "The Marvels",
+  "Extraction",
+  "Creed III"
+];
+
 // Fetch movies
 async function fetchMovies(query) {
   const response = await fetch(`https://www.omdbapi.com/?apikey=${API_KEY}&s=${query}`);
@@ -50,7 +71,7 @@ async function fillupCards(initKeys) {
       containers[i].style.backgroundSize = "cover";
       containers[i].style.backgroundPosition = "center";
       containers[i].addEventListener("click", () => {
-      window.location.href = `details.html?id=${movie.imdbID}`;
+      window.location.href = `details.html?id=${movies[0].imdbID}`;
     });
     }
   }
